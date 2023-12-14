@@ -1,8 +1,8 @@
 import Route from '@ioc:Adonis/Core/Route'
 
+// create a support request
+Route.post('/requests', 'RequestsController.store');
+
 // get all support requests
-Route.get('/requests', async () => {
-  return {
-    users: 'requests are currently not available'
-  }
-})
+Route.get('/requests', 'RequestsController.index');
+
