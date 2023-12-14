@@ -4,14 +4,15 @@ import SupportRequest from 'App/Models/SupportRequest';
 export default class RequestsController {
 	// create a new support request
 	public async store({ request, response }: HttpContextContract) {
-		const {first_name, last_name, email, title, text, file_path} = request.body();
-		
-		if (!first_name || !last_name || !email || !title || !text || !file_path) {
-			response.status(400);
-			throw new Error('Incomplete fields! Add "first_name", "last_name", "email", "title", "text", and "file_path" fields to the request body');
+		const {first_name, last_name, email, title, text} = request.body();
+		const file_path: any = request.file('file'); // file handling
+
+		if (!first_name || !last_name || !email || !title || !text) {
+			return response.status(400).send('Incomplete fields! Add "first_name", "last_name", "email", "title", "text", and "file_path" fields to the request body');
 		}
 		
 		try {
+
 			const newSupportRequest = new SupportRequest();
 			newSupportRequest.fill({
 				first_name,

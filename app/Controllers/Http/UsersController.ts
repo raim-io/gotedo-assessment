@@ -1,77 +1,76 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { schema } from '@ioc:Adonis/Core/Validator';
+import { schema, rules } from '@ioc:Adonis/Core/Validator';
 import User from 'App/Models/User'
 
 export default class UsersController {
+
 	// create a new user
 	public async store({ request, response }: HttpContextContract) {
-		const {email, full_name} = request.body();
-		
-		const user = await User.findBy('email', email);
-
-		if (!email || !full_name) {
-			response.status(400);
-			throw new Error("Request body cannot be blank!, input email or full_name field");
-		}
-
-		if (user) {
-			response.status(201);
-			throw new Error("User with this email already exists!");
-		}
-
 		try {
+			const {email, full_name} = request.body();
+	
+			// validate request input
+			if (!email || !full_name) {
+				return response.status(400).send({message: 'Request body cannot be blank! fill in the email and full_name fields.'});
+			}
+
+			// check for user's existence
+			const userExists = await User.findBy('email', email);
+			if (userExists) {
+				return response.status(400).send({message: 'User with this email already exists!'});
+			}
+
+			// create new user instance
 			const newUser = new User();
 			newUser.fill({
 				email,
 				full_name,
 			});
+			await newUser.save(); // save newly created user
 	
-			await newUser.save();
-
-			if (!newUser) {
-				response.status(400);
-				throw new Error("Oops, an error ocurred while creating new user.");
-			}
-	
-			response.status(201).send(newUser);		
+			return response.status(201).send(newUser);		
 		} catch (error) {
-			response.status(400);
-			throw new Error(error.message);
-			
+			response.status(500);
+			throw new Error(error.message);	
 		}
 	}
+
 
 	// get all users
 	public async index({response}: HttpContextContract) {
 		try {
 			const users = await User.all();
 
-			return response.status(200).send(users);
+			if (users.length === 0) {
+				return response.status(200).send({ message: 'There are currently no users.' });
+			}
+			
+			return response.status(200).send(users);		
 		} catch (error) {
 			response.status(500);
 			throw new Error(error.message);
-			
 		}
 	} 
 
-	// get a single user by id or email
-	public async show({params, response}: HttpContextContract) {
-
-		if (!params.id) {
-			response.status(400);
-			throw new Error("Request parameter cannot be blank!, specify Id in request parameter.")
-		}
-
-		try {	
-			const user = await User.find(params.id);
-			if (!user) {
-				response.status(404);
-				throw new Error(`User with the Id "${params.id}" was not found.`);
-			}
 	
+	// get a single user by id
+	public async show({ params, response }: HttpContextContract) {
+		try {
+			const userId = params.id;
+	
+			//if (!userId) {
+			//	return response.status(400).send({message: "Request parameter cannot be blank!, specify Id in request parameter."})
+			//}
+
+			const user = await User.find(userId);
+
+			if (!user) {
+				return response.status(404).send({message: `User with the Id '${userId}' was not found.`});
+			}
+
 			response.status(200).send(user);
 		} catch (error) {
-			response.status(400);
+			response.status(500);
 			throw new Error(error.message);
 		}
 
@@ -79,21 +78,28 @@ export default class UsersController {
 
 	// update a user by Id
 	public async update({ params, request, response }: HttpContextContract) {
-		if (!params.id) {
-			response.status(400);
-			throw new Error("Id parameter cannot be blank!");
-		}
-
 		try {
-			const user = await User.find(params.id);
+			const userId = params.id;
+	
+			//if (!userId) {
+			//	return response.status(400).send({message: "Request parameter cannot be blank!, specify Id in request parameter."});
+			//}
+
+			const user: any = await User.find(userId);
 
 			if (!user) {
-				response.status(400);
-				throw new Error(`User with the Id "${params.id}" was not found!`);
+				return response.status(404).send({message: `User with the Id '${userId}' was not found, and may not exist.`});
 			}
 
 			const userSchema = schema.create({
-				email: schema.string(),
+				email: schema.string({}, [
+					rules.email(),
+					rules.unique({ // define email uniqueness
+						table: 'users',
+						column: 'email',
+						whereNot: {id: userId}
+					}),
+				]),
 				full_name: schema.string(),
 			})
 
@@ -104,34 +110,33 @@ export default class UsersController {
 
 			await user.save();
 
-			response.status(200).send(user);
+			return response.status(200).send(user);
 		} catch (error) {
-			response.status(200);
+			response.status(500);
 			throw new Error(error.message);
 		}
 	}
 
 	// delete a user
 	public async destroy({ params, response }: HttpContextContract) {
-		if (!params.id) {
-			response.status(400);
-			throw new Error("Id parameter cannot be blank!");
+		const userId = params.id;
+
+		if (!userId) {
+			response.status(400).send({message: "Request parameter cannot be blank!, specify Id in request parameter."});
 		}
 
 		try {
-			const user = await User.find(params.id);
+			const user = await User.find(userId);
 	
 			if (!user) {
-				response.status(400);
-				throw new Error(`User with the id "${params.id}" was not found`);
+				return response.status(404).send(`User with the id '${userId}' was not found, and may not exist.`);
 			}
 	
 			await user.delete();
 	
-			response.status(200).send(user)
-			
+			return response.status(200).send(user);			
 		} catch (error) {
-			response.status(400);
+			response.status(500);
 			throw new Error(error.message);
 		}
 	}
