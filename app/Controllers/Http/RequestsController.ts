@@ -1,53 +1,96 @@
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import Application from '@ioc:Adonis/Core/Application';
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext';
 import SupportRequest from 'App/Models/SupportRequest';
+import User from 'App/Models/User';
+import RequestSchema from 'App/Validators/RequestValidator';
 
 export default class RequestsController {
 	// create a new support request
 	public async store({ request, response }: HttpContextContract) {
-		const {first_name, last_name, email, title, text} = request.body();
-		const file_path: any = request.file('file'); // file handling
-
-		if (!first_name || !last_name || !email || !title || !text) {
-			return response.status(400).send('Incomplete fields! Add "first_name", "last_name", "email", "title", "text", and "file_path" fields to the request body');
-		}
 		
 		try {
+			const payload: any = await request.validate({ schema: RequestSchema });
+	
+			// file handling
+			const fileExists = request.file('file');
+			if (fileExists) {
+				const fileName = `${new Date().getTime()}_${payload.email}`;
+				await fileExists?.move(Application.tmpPath('uploads'), {
+					name: fileName,
+				});
+	
+				payload.file_path = `uploads/${fileName}`;
+			}
+
+			// find & link user via email, or create new
+			let user = await User.findBy('email', payload.email);
+			if (!user) {
+				user = await User.create({
+					email: payload.email,
+					full_name: `${payload.first_name} ${payload.last_name}`
+				});
+			}
 
 			const newSupportRequest = new SupportRequest();
 			newSupportRequest.fill({
-				first_name,
-				last_name,
-				email,
-				title,
-				text,
-				file_path,
+				...payload,
+				//user_id: user.id
 			});
 	
 			await newSupportRequest.save();
 
-			if (!newSupportRequest) {
-				response.status(400);
-				throw new Error("Oops, an error ocurred while creating new support request.");
-			}
+			//if (!newSupportRequest) {
+			//	response.status(400);
+			//	throw new Error("Oops, an error ocurred while creating new support request.");
+			//}
 	
-			response.status(201).send(newSupportRequest);		
+			return response.status(201).send(newSupportRequest);		
 		} catch (error) {
-			response.status(400);
+			response.status(500);
 			throw new Error(error.message);
 			
 		}
 	}
+
 
 	// get all support requests
 	public async index({response}: HttpContextContract) {
 		try {
 			const supportRequests = await SupportRequest.all();
 
-			return response.status(200).send(supportRequests);
+			if (supportRequests.length === 0) {
+				return response.status(200).send({ message: 'There are currently no support requests.' });
+			}
+			
+			return response.status(200).send(supportRequests);		
 		} catch (error) {
 			response.status(500);
 			throw new Error(error.message);
-			
 		}
-	} 
+	}
+
+
+	// delete a support reequest
+	public async destroy({ params, response }: HttpContextContract) {
+		const requestId = params.id;
+
+		if (!requestId) {
+			response.status(400).send({message: "Request parameter cannot be blank!, specify Id in request parameter."});
+		}
+
+		try {
+			const supportRequest = await User.find(requestId);
+	
+			if (!supportRequest) {
+				return response.status(404).send(`User with the id '${requestId}' was not found, and may not exist.`);
+			}
+	
+			await supportRequest.delete();
+	
+			return response.status(200).send(supportRequest);			
+		} catch (error) {
+			response.status(500);
+			throw new Error(error.message);
+		}
+	}
 }

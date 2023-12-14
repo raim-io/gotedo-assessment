@@ -9,7 +9,7 @@ export default class extends BaseSchema {
       table.string('first_name', 255).notNullable()
       table.string('last_name', 255).notNullable
       table.string('email', 255).notNullable()
-      table.string('title').notNullable() // support request title
+      table.string('title') // support request title
       table.text('message', 'long') // support request message
       table.string('file_path').nullable() // stores the path to the file
 

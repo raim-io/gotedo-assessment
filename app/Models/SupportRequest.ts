@@ -19,7 +19,7 @@ export default class SupportRequest extends BaseModel {
   public title: string
 
   @column()
-  public text: string
+  public message: string
 
   @column()
   public file_path: string
