@@ -31,20 +31,23 @@ export default class RequestsController {
 				});
 			}
 
-			const newSupportRequest = new SupportRequest();
-			newSupportRequest.fill({
+			const supportRequest = new SupportRequest();
+			supportRequest.fill({
 				...payload,
-				//user_id: user.id
+				user_email: user.email,
 			});
 	
-			await newSupportRequest.save();
+			// await supportRequest.save();
+
+			// save & link support request to user via email
+			await user.related('supportRequests').save(supportRequest)
 
 			//if (!newSupportRequest) {
 			//	response.status(400);
 			//	throw new Error("Oops, an error ocurred while creating new support request.");
 			//}
 	
-			return response.status(201).send(newSupportRequest);		
+			return response.status(201).send(supportRequest);		
 		} catch (error) {
 			response.status(500);
 			throw new Error(error.message);

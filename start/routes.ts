@@ -20,8 +20,9 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 
-import './routes/user'
-import './routes/requests'
+import './routes/user';
+import './routes/requests';
+import './routes/userRequests';
 
 Route.get('/', async () => {
   return { hello: 'Gotedo...' }

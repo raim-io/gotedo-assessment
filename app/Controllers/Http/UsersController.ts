@@ -1,21 +1,24 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { schema, rules } from '@ioc:Adonis/Core/Validator';
-import User from 'App/Models/User'
+import User from 'App/Models/User';
+import UserSchema from 'App/Validators/UserValidator';
 
 export default class UsersController {
 
 	// create a new user
 	public async store({ request, response }: HttpContextContract) {
 		try {
-			const {email, full_name} = request.body();
+			const payload: any = await request.validate({schema: UserSchema})
 	
+			// console.log(payload);
+
 			// validate request input
-			if (!email || !full_name) {
+			if (!payload.email || !payload.full_name) {
 				return response.status(400).send({message: 'Request body cannot be blank! fill in the email and full_name fields.'});
 			}
 
 			// check for user's existence
-			const userExists = await User.findBy('email', email);
+			const userExists = await User.findBy('email', payload.email);
 			if (userExists) {
 				return response.status(400).send({message: 'User with this email already exists!'});
 			}
@@ -23,8 +26,7 @@ export default class UsersController {
 			// create new user instance
 			const newUser = new User();
 			newUser.fill({
-				email,
-				full_name,
+				...payload,
 			});
 			await newUser.save(); // save newly created user
 	
