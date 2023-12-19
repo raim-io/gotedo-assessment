@@ -189,5 +189,6 @@ These are the usage primary functionality as required by the assessment. Note th
 	- Updating a user
 	- Deleting a user
 	- Finding a user by ID
+	- And more...
 
-are readily available in the project, and it's appropriate usage can be understood with a quick glance through the routes and controllers.
+are readily available in this project, and it's appropriate usage can be understood with a quick glance through the routes and controllers.
