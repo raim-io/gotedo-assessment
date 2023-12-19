@@ -4,7 +4,7 @@ import User from 'App/Models/User';
 import UserSchema from 'App/Validators/UserValidator';
 
 export default class UsersController {
-
+// -- primary controller --
 	// create a new user
 	public async store({ request, response }: HttpContextContract) {
 		try {
@@ -38,6 +38,7 @@ export default class UsersController {
 	}
 
 
+// -- secondary controllers --
 	// get all users
 	public async index({response}: HttpContextContract) {
 		try {

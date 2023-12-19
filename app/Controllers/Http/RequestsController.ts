@@ -5,6 +5,7 @@ import User from 'App/Models/User';
 import RequestSchema from 'App/Validators/RequestValidator';
 
 export default class RequestsController {
+// -- primary controllers --
 	// create a new support request
 	public async store({ request, response }: HttpContextContract) {
 		
@@ -55,23 +56,6 @@ export default class RequestsController {
 		}
 	}
 
-
-	// get all support requests
-	public async index({response}: HttpContextContract) {
-		try {
-			const supportRequests = await SupportRequest.all();
-
-			if (supportRequests.length === 0) {
-				return response.status(200).send({ message: 'There are currently no support requests.' });
-			}
-			
-			return response.status(200).send(supportRequests);		
-		} catch (error) {
-			response.status(500);
-			throw new Error(error.message);
-		}
-	}
-
 	// get all support requests linked to the same email
 	public async indexViaEmail({params, response}: HttpContextContract) {
 		try {
@@ -93,8 +77,25 @@ export default class RequestsController {
 		}
 	}
 
+	// get all support requests
+	public async index({response}: HttpContextContract) {
+		try {
+			const supportRequests = await SupportRequest.all();
 
-	// delete a support reequest
+			if (supportRequests.length === 0) {
+				return response.status(200).send({ message: 'There are currently no support requests.' });
+			}
+			
+			return response.status(200).send(supportRequests);		
+		} catch (error) {
+			response.status(500);
+			throw new Error(error.message);
+		}
+	}
+
+
+// -- secondary controller
+	// delete a support request
 	public async destroy({ params, response }: HttpContextContract) {
 		const requestId = params.id;
 
