@@ -14,12 +14,12 @@ export default class RequestsController {
 			// file handling
 			const fileExists = request.file('file');
 			if (fileExists) {
-				const fileName = `${new Date().getTime()}_${payload.email}`;
+				const fileName = `${new Date().getTime()}_${fileExists?.clientName}`;
 				await fileExists?.move(Application.tmpPath('uploads'), {
 					name: fileName,
 				});
 	
-				payload.file_path = `uploads/${fileName}`;
+				payload.file_path = `tmp/uploads/${fileName}`;
 			}
 
 			// find & link user via email, or create new
@@ -47,7 +47,7 @@ export default class RequestsController {
 			//	throw new Error("Oops, an error ocurred while creating new support request.");
 			//}
 	
-			return response.status(201).send(supportRequest);		
+			return response.status(201).send(supportRequest );		
 		} catch (error) {
 			response.status(500);
 			throw new Error(error.message);
@@ -63,6 +63,27 @@ export default class RequestsController {
 
 			if (supportRequests.length === 0) {
 				return response.status(200).send({ message: 'There are currently no support requests.' });
+			}
+			
+			return response.status(200).send(supportRequests);		
+		} catch (error) {
+			response.status(500);
+			throw new Error(error.message);
+		}
+	}
+
+	// get all support requests linked to the same email
+	public async indexViaEmail({params, response}: HttpContextContract) {
+		try {
+			const userEmail = params.email;
+			//if (!userEmail) {
+			//	response.status(400).send({message: "Request parameter cannot be blank!, specify user's email in request parameter."})
+			//}
+
+			const supportRequests = await SupportRequest.query().where('user_email', userEmail).exec();
+
+			if (!supportRequests || supportRequests.length === 0) {
+				return response.status(404).send({ message: 'There are currently no support requests linked to this email address.' });
 			}
 			
 			return response.status(200).send(supportRequests);		
