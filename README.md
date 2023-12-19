@@ -1,14 +1,15 @@
 # Gotedo backend coding assessment
 
+
 ## Table of Contents
 
 - [Problem Statement, Requirements and Approach](#problem-statement-requirements-and-approach)
+- [Database (E-R) Diagram](#database-diagram)
 - [Installation](#installation)
 - [Testing](#testing)
 - [Features](#features)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
+
 
 ## Problem Statement, Requirements and Approach
 
@@ -49,6 +50,13 @@ You are part of the backend team saddled with the responsibility of developing t
 6. Write tests for your backend Adonisjs/Japa test runner. See the [introduction](https://docs.adonisjs.com/guides/testing/introduction) and [HTTP tests](https://docs.adonisjs.com/guides/testing/http-tests). 
 	- Testing file uploads [here](https://docs.adonisjs.com/guides/testing/http-tests#file-uploads) and [here](https://v2.japa.dev/docs/plugins/api-client#file-uploads).
 	- Testing forms [here](https://docs.adonisjs.com/guides/testing/http-tests#file-uploads).
+
+
+## Database (E-R) Diagram
+
+![E-R Diagram](./public/E-R.png)
+
+P.S A live version of this diagram is readily available [here](https://dbdiagram.io/d/6581e95c56d8064ca055da7a)
 
 
 ## Installation
@@ -119,6 +127,7 @@ As required by the assessment, the project's main feature is creating a user sup
 
 For the ease of simplicity, i will be using ThunderClient VSCode extension to use/test these APIs
 
+
 ### Support Requests
 
 #### `Create a support request`
@@ -171,6 +180,7 @@ For the ease of simplicity, i will be using ThunderClient VSCode extension to us
 7. Recieve response asserting successful user creation
 
 ![Create a new user](./public/create-user.png)
+
 
 ### `P.S:`
 These are the usage primary functionality as required by the assessment. Note that other functionalities (secondary) like:
