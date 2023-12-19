@@ -100,6 +100,11 @@ To run the test scripts, make sure you are in the project's root directory, then
 node ace test
 ```
 
+![Test 1](./public/test1.png)
+
+![Test 2&3](./public/test2.png)
+
+
 ## Features
 
 As required by the assessment, the project's main feature is creating a user support request system (something like a complaint form) with various form fields. Other features includes:
